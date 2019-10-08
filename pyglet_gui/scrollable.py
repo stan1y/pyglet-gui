@@ -14,6 +14,7 @@ class ScrollableGroup(pyglet.graphics.Group):
     We restrict what's shown within a Scrollable by performing a scissor
     test.
     """
+
     def __init__(self, x, y, width, height, parent=None):
         pyglet.graphics.Group.__init__(self, parent)
         self.x, self.y, self.width, self.height = x, y, width, height
@@ -23,10 +24,12 @@ class ScrollableGroup(pyglet.graphics.Group):
         """
         Enables a scissor test on our region
         """
-        gl.glPushAttrib(gl.GL_ENABLE_BIT | gl.GL_TRANSFORM_BIT | gl.GL_CURRENT_BIT)
+        gl.glPushAttrib(gl.GL_ENABLE_BIT |
+                        gl.GL_TRANSFORM_BIT | gl.GL_CURRENT_BIT)
         self.was_scissor_enabled = gl.glIsEnabled(gl.GL_SCISSOR_TEST)
         gl.glEnable(gl.GL_SCISSOR_TEST)
-        gl.glScissor(int(self.x), int(self.y), int(self.width), int(self.height))
+        gl.glScissor(int(self.x) * 2, int(self.y) * 2,
+                     int(self.width) * 2, int(self.height) * 2)
 
     def unset_state(self):
         """
@@ -58,7 +61,8 @@ class Scrollable(Wrapper, Controller, ControllerManager):
         self._theme = None
         self.batch = None
         self.root_group = None
-        self.group = {'panel': None, 'background': None, 'foreground': None, 'highlight': None}
+        self.group = {'panel': None, 'background': None,
+                      'foreground': None, 'highlight': None}
 
     @Managed.theme.getter
     def theme(self):
@@ -68,11 +72,15 @@ class Scrollable(Wrapper, Controller, ControllerManager):
         Controller.set_manager(self, manager)
         self._theme = manager.theme
         self.batch = manager.batch
-        self.root_group = ScrollableGroup(0, 0, self.width, self.height, parent=manager.group['foreground'])
+        self.root_group = ScrollableGroup(
+            0, 0, self.width, self.height, parent=manager.group['foreground'])
         self.group['panel'] = pyglet.graphics.OrderedGroup(0, self.root_group)
-        self.group['background'] = pyglet.graphics.OrderedGroup(10, self.root_group)
-        self.group['foreground'] = pyglet.graphics.OrderedGroup(20, self.root_group)
-        self.group['highlight'] = pyglet.graphics.OrderedGroup(30, self.root_group)
+        self.group['background'] = pyglet.graphics.OrderedGroup(
+            10, self.root_group)
+        self.group['foreground'] = pyglet.graphics.OrderedGroup(
+            20, self.root_group)
+        self.group['highlight'] = pyglet.graphics.OrderedGroup(
+            30, self.root_group)
         self.content.set_manager(self)
         self.content.parent = self
 
@@ -103,7 +111,7 @@ class Scrollable(Wrapper, Controller, ControllerManager):
         # We only intercept events for the content region, not for
         # the scrollbars. They can handle themselves.
         return y >= self._content_y < self._content_y + self._content_height and \
-               self._content_x <= x < self._content_x + self._content_width
+            self._content_x <= x < self._content_x + self._content_width
 
     def is_expandable(self):
         return True
@@ -186,7 +194,8 @@ class Scrollable(Wrapper, Controller, ControllerManager):
 
             height += scroll_height
         if self._vscrollbar is not None:
-            self._vscrollbar.set_knob_size(self._content_height, content_height)
+            self._vscrollbar.set_knob_size(
+                self._content_height, content_height)
             scroll_width, _ = self._vscrollbar.compute_size()
 
             width += scroll_width
