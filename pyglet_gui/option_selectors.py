@@ -36,18 +36,21 @@ class OptionButton(Option, Button):
 class VerticalButtonSelector(VerticalContainer, Selector):
     def __init__(self, options, labels=None, align=HALIGN_CENTER, padding=4, on_select=None):
         Selector.__init__(self, options, labels, on_select)
-        VerticalContainer.__init__(self, list(self._options.values()), align=align, padding=padding)
+        VerticalContainer.__init__(self, list(
+            self._options.values()), align=align, padding=padding)
 
     def _make_options(self, options, labels):
         widget_options = []
         for option, label in zip(options, labels):
-            widget_options.append(OptionButton(option, label, is_selected=(option == self._selected), parent=self))
+            widget_options.append(OptionButton(
+                option, label, is_selected=(option == self._selected), parent=self))
         return widget_options
 
 
 class Dropdown(Selector, OneTimeButton):
-    def __init__(self, options, labels=None, max_height=400, align=VALIGN_TOP, on_select=None):
-        Selector.__init__(self, options, labels, on_select=on_select, selected=options[0])
+    def __init__(self, options, labels=None, max_height=400, align=VALIGN_TOP, selected=None, on_select=None):
+        Selector.__init__(self, options, labels,
+                          on_select=on_select, selected=selected or options[0])
         OneTimeButton.__init__(self)
 
         self.max_height = max_height
@@ -58,7 +61,8 @@ class Dropdown(Selector, OneTimeButton):
     def _make_options(self, options, labels):
         widget_options = []
         for option, label in zip(options, labels):
-            widget_options.append(OptionButton(option, label, is_selected=(option == self._selected), parent=self))
+            widget_options.append(OptionButton(
+                option, label, is_selected=(option == self._selected), parent=self))
         return widget_options
 
     def _delete_pulldown_menu(self):
