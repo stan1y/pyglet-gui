@@ -7,11 +7,12 @@ from pyglet_gui.controllers import TwoStateController
 from pyglet_gui.core import Viewer
 from pyglet_gui.mixins import FocusMixin
 
+
 class Button(TwoStateController, Viewer):
     def __init__(self, label="", is_pressed=False, on_press=None):
-        TwoStateController.__init__(self, is_pressed=is_pressed, on_press=on_press)
+        TwoStateController.__init__(
+            self, is_pressed=is_pressed, on_press=on_press)
         Viewer.__init__(self)
-
         self.label = label
 
         # graphics
@@ -41,7 +42,8 @@ class Button(TwoStateController, Viewer):
     def load_graphics(self):
         theme = self.theme[self.get_path()]
 
-        self._button = theme['image'].generate(theme['gui_color'], **self.get_batch('background'))
+        self._button = theme['image'].generate(
+            theme['gui_color'], **self.get_batch('background'))
 
         self._label = Label(self.label,
                             font_name=theme['font'],
@@ -80,7 +82,8 @@ class GroupButton(Button):
     button_groups = {}
 
     def __init__(self, group_id="", label="", is_pressed=False, on_press=None):
-        Button.__init__(self, label=label, is_pressed=is_pressed, on_press=on_press)
+        Button.__init__(self, label=label,
+                        is_pressed=is_pressed, on_press=on_press)
         self.button_groups.setdefault(group_id, []).append(self)
         self.group_id = group_id
 
@@ -112,7 +115,8 @@ class Checkbox(Button):
     def __init__(self, label="", is_pressed=False, on_press=None, align=HALIGN_RIGHT, padding=4):
 
         assert align in [HALIGN_LEFT, HALIGN_RIGHT]
-        Button.__init__(self, label=label, is_pressed=is_pressed, on_press=on_press)
+        Button.__init__(self, label=label,
+                        is_pressed=is_pressed, on_press=on_press)
 
         self.align = align  # where the label is positioned.
 
@@ -157,6 +161,7 @@ class FocusButton(Button, FocusMixin):
     """
     Button that is focusable and thus can be selected with TAB.
     """
+
     def __init__(self, label="", is_pressed=False, on_press=None):
         Button.__init__(self, label, is_pressed, on_press)
         FocusMixin.__init__(self)

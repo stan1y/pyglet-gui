@@ -64,7 +64,8 @@ class FocusMixin(Controller, Viewer):
     def load_graphics(self):
         theme = self.theme[self.get_path()]
 
-        self._focus = theme['focus']['image'].generate(theme['focus_color'], **self.get_batch('highlight'))
+        self._focus = theme['focus']['image'].generate(
+            theme['focus_color'], **self.get_batch('highlight'))
 
     def unload_graphics(self):
         self._focus.unload()

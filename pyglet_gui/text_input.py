@@ -1,7 +1,20 @@
 import pyglet
+
+from functools import wraps
+
 from pyglet_gui.mixins import FocusMixin
 from pyglet_gui.override import InputLabel
 from pyglet_gui.core import Viewer
+
+
+def if_not_readonly(f):
+    @wraps(f)
+    def wrapper(self, *args, **kwargs):
+        if getattr(self, 'readonly') is True:
+            return
+        return f(self, *args, **kwargs)
+
+    return wrapper
 
 
 class TextInput(FocusMixin, Viewer):
@@ -9,7 +22,10 @@ class TextInput(FocusMixin, Viewer):
     #   True: "writing"
     #   False: "label"
 
-    def __init__(self, text="", length=20, max_length=None, padding=0, on_input=None):
+    def __init__(self,
+                 text="", length=20, max_length=None,
+                 padding=0, on_input=None,
+                 readonly=False):
         Viewer.__init__(self)
         FocusMixin.__init__(self)
 
@@ -21,6 +37,7 @@ class TextInput(FocusMixin, Viewer):
         self._on_input = on_input
 
         self._padding = 4 + padding
+        self._readonly = readonly
 
         # graphics loaded in both states
         self._field = None
@@ -32,8 +49,23 @@ class TextInput(FocusMixin, Viewer):
         # graphics loaded in state "label"
         self._label = None
 
+    @property
+    def readonly(self):
+        return self._readonly
+
+    @readonly.setter
+    def readonly(self, v):
+        if self._readonly == v:
+            return
+        self._readonly = v
+        if self.is_loaded:
+            self.reload()
+            self.reset_size()
+
     def get_path(self):
-        return 'input'
+        if self.readonly:
+            return ['input', 'readonly']
+        return ['input']
 
     def _load_label(self, theme):
         self._label = InputLabel(self._document.text,
@@ -51,7 +83,8 @@ class TextInput(FocusMixin, Viewer):
             self._document, needed_width, needed_height,
             multiline=False, **self.get_batch('foreground'))
 
-        self._caret = pyglet.text.caret.Caret(self._text_layout, color=theme['gui_color'][0:3])
+        self._caret = pyglet.text.caret.Caret(
+            self._text_layout, color=theme['gui_color'][0:3])
         self._caret.visible = True
         self._caret.mark = 0
         self._caret.position = len(self._document.text)
@@ -68,14 +101,16 @@ class TextInput(FocusMixin, Viewer):
                                           font_size=theme['font_size']))
             self._document_style_set = True
 
-        self._field = theme['image'].generate(color=theme['gui_color'], **self.get_batch('background'))
+        self._field = theme['image'].generate(
+            color=theme['gui_color'], **self.get_batch('background'))
         if self.is_focus():
             self._load_writing(theme)
         else:
             self._load_label(theme)
 
     def _unload_writing(self):
-        self._caret.delete()  # it should be .unload(), but Caret does not have it.
+        # it should be .unload(), but Caret does not have it.
+        self._caret.delete()
         self._document.remove_handlers(self._text_layout)
         self._text_layout.delete()  # it should also be .unload().
         self._caret = self._text_layout = None
@@ -124,6 +159,7 @@ class TextInput(FocusMixin, Viewer):
             self._label.width = width - self._padding * 2
             self._label.end_update()
 
+    @if_not_readonly
     def on_gain_focus(self):
         self.unload()
         FocusMixin.on_gain_focus(self)  # changes is_focus()
@@ -132,6 +168,7 @@ class TextInput(FocusMixin, Viewer):
         self.reset_size()
         self.layout()
 
+    @if_not_readonly
     def on_lose_focus(self):
         # send text to callback _on_input
         if self._on_input is not None:
@@ -147,14 +184,17 @@ class TextInput(FocusMixin, Viewer):
     def hit_test(self, x, y):
         return self.is_inside(x, y)
 
+    @if_not_readonly
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
         if self.is_focus():
             return self._caret.on_mouse_drag(x, y, dx, dy, buttons, modifiers)
 
+    @if_not_readonly
     def on_mouse_press(self, x, y, button, modifiers):
         if self.is_focus():
             return self._caret.on_mouse_press(x, y, button, modifiers)
 
+    @if_not_readonly
     def on_text(self, text):
         assert self.is_focus()
 
@@ -164,17 +204,19 @@ class TextInput(FocusMixin, Viewer):
             self._caret.mark = self._caret.position = self._max_length
         return pyglet.event.EVENT_HANDLED
 
+    @if_not_readonly
     def on_text_motion(self, motion):
         assert self.is_focus()
         return self._caret.on_text_motion(motion)
 
+    @if_not_readonly
     def on_text_motion_select(self, motion):
         assert self.is_focus()
         return self._caret.on_text_motion_select(motion)
 
     def set_text(self, text):
         self._document.text = text
-        if self.is_focus():
+        if self.is_focus() and not self.readonly:
             self._caret.mark = self._caret.position = len(self._document.text)
         else:
             self._label.text = text

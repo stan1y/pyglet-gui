@@ -10,6 +10,7 @@ class Document(Controller, Viewer):
     Allows you to embed a document within the GUI, which includes a
     vertical scrollbar.
     """
+
     def __init__(self, document, width=0, height=0, is_fixed_size=False):
         Viewer.__init__(self, width, height)
         Controller.__init__(self)
@@ -41,7 +42,8 @@ class Document(Controller, Viewer):
                 self._scrollbar.set_manager(self._manager)
                 self._scrollbar.parent = self
                 self._scrollbar.load()
-                self._scrollbar.set_knob_size(self.height, self._content.content_height)
+                self._scrollbar.set_knob_size(
+                    self.height, self._content.content_height)
         # if smaller, we unload it if it is loaded
         elif self._scrollbar is not None:
             self._scrollbar.unload()
@@ -86,7 +88,8 @@ class Document(Controller, Viewer):
 
     def layout(self):
         if self._scrollbar is not None:
-            self._scrollbar.set_position(self.x + self._content.content_width, self.y)
+            self._scrollbar.set_position(
+                self.x + self._content.content_width, self.y)
             pos = self._scrollbar.get_knob_pos()
             if pos != -self._content.view_y:
                 self._content.view_y = -pos

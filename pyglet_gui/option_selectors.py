@@ -23,7 +23,7 @@ class OptionButton(Option, Button):
 
     def on_mouse_press(self, x, y, button, modifiers):
         self.select()
-        self.parent.layout()
+        # self.parent.layout()
         return True
 
     def on_key_press(self, symbol, modifiers):
@@ -120,7 +120,7 @@ class Dropdown(Selector, OneTimeButton):
             Frame(Scrollable(VerticalContainer(list(self._options.values())),
                              height=self.max_height), path=['dropdown', 'pulldown']),
             window=self._manager.window, batch=self._manager.batch,
-            group=self._manager.root_group.parent, theme=self._manager.theme,
+            group=None, theme=self._manager.theme,
             is_movable=False, anchor=anchor, offset=(x, y))
 
     def delete(self):
