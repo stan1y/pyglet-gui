@@ -28,8 +28,14 @@ class ScrollableGroup(pyglet.graphics.Group):
                         gl.GL_TRANSFORM_BIT | gl.GL_CURRENT_BIT)
         self.was_scissor_enabled = gl.glIsEnabled(gl.GL_SCISSOR_TEST)
         gl.glEnable(gl.GL_SCISSOR_TEST)
-        gl.glScissor(int(self.x) * 2, int(self.y) * 2,
-                     int(self.width) * 2, int(self.height) * 2)
+        if pyglet.compat_platform == 'darwin':
+            # Double the dimentions for Mac OS X
+            gl.glScissor(int(self.x) * 2, int(self.y) * 2,
+                        int(self.width) * 2, int(self.height) * 2)
+        else:
+            gl.glScissor(int(self.x), int(self.y),
+                     int(self.width), int(self.height))
+
 
     def unset_state(self):
         """
